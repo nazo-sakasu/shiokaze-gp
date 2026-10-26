@@ -132,6 +132,7 @@
       }
       function shutdown() {
         closed = true;
+        window.removeEventListener('pagehide', onHide);
         clearInterval(tickT);
         setConn(false);
         try { link && link.close(); } catch (e) {}
@@ -410,7 +411,7 @@
       });
 
       // a closing tab tells the room right away instead of waiting for the timeout
-      const onHide = () => { if (!closed) api.leave(); };
+      function onHide() { if (!closed) api.leave(); }
       window.addEventListener('pagehide', onHide);
 
       (async () => {

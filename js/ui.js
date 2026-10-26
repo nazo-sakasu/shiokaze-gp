@@ -191,7 +191,7 @@
     $('pauseLead').hidden = !online;
     $('restart').hidden = online;
     $('leaveRoom').hidden = !online;
-    $('quit').textContent = online ? (G.Net.isHost ? 'レースを終えてロビーへ' : 'リタイアしてロビーへ') : 'タイトルへ';
+    $('quit').textContent = online ? (G.Net.isHost ? 'レースを終了（全員ロビーへ）' : 'リタイアしてロビーへ') : 'タイトルへ';
     $('quit').classList.toggle('wide', !online);
     $('resume').classList.toggle('wide', online);
   }
@@ -355,6 +355,7 @@
   UI.primary = function () {
     if (UI.mode() !== 'online') return UI.startRace();
     const Net = G.Net;
+    if (UI.switching || $('title').hidden) return;
     if (Net.inRoom() && Net.isHost && myIndex() < 8) { G.Audio.unlock(); G.Audio.play('ui'); Net.hostStart(); }
   };
   function myIndex() {

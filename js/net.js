@@ -198,6 +198,8 @@
     const i = race.karts.findIndex((k) => k.key === peer && k.remote && k.human);
     if (i < 0) return;
     const k = race.karts[i];
+    // someone who already crossed the line keeps their place in the results
+    if (k.finished) { G.UI.toast((k.netName || k.c.name) + ' ' + (why || 'が退出しました')); return; }
     Game().scene.remove(k.model.root);
     race.karts.splice(i, 1);
     G.UI.buildRanks(race);
@@ -244,6 +246,9 @@
 
   Net.hostStart = function () {
     if (!Net.isHost) return;
+    // one race at a time: ignore a second press while this one is loading or running
+    const cur = Game().race;
+    if (Net.hs && (Net.hs.ph === 'prep' || Net.hs.ph === 'count' || Net.hs.ph === 'race') && cur && cur.online && !cur.attract) return;
     const s = Game().settings;
     const humans = members().slice(0, 8).map((p) => [p.peer, String(p.presence.ch || 'koro')]);
     const slots = [];
