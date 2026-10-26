@@ -209,6 +209,56 @@ tr.me td{background:rgba(255,181,74,.14)}
 tr.me td:first-child{border-radius:12px 0 0 12px} tr.me td:last-child{border-radius:0 12px 12px 0}
 .you{font-size:10px;background:var(--sun);color:var(--ink);padding:2px 7px;border-radius:999px;letter-spacing:.06em}
 
+/* ---------- Records (TOP3 per course and class) ---------- */
+.records{max-width:470px;margin-top:12px;padding:10px 12px 8px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.records:empty{display:none}
+.rec-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 2px 5px}
+.rec-h b{font-family:var(--f-display);font-weight:400;font-size:14px;letter-spacing:.08em}
+.rec-h span{font-size:11px;font-weight:800;color:var(--paper-dim);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.rec-list li{--m:var(--ink-3);display:grid;grid-template-columns:24px 28px minmax(0,1fr) auto auto;align-items:center;gap:9px;padding:4px 6px;border-radius:12px;min-height:36px}
+.rec-list li.r1{--m:linear-gradient(180deg,#fff3b0,#ffd257 55%,#f29a2e)}
+.rec-list li.r2{--m:linear-gradient(180deg,#ffffff,#cfc4e3)}
+.rec-list li.r3{--m:linear-gradient(180deg,#ffd9bd,#e59a6a)}
+.rec-list li i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-size:12px;line-height:1;color:var(--ink);background:var(--m);box-shadow:inset 0 -2px 0 rgba(28,19,48,.22),0 2px 0 rgba(12,8,24,.5)}
+.rec-list li img,.rec-list li .ph{width:28px;height:28px;border-radius:9px;object-fit:contain;object-position:50% 100%;padding:2px 1px 0;background:radial-gradient(circle at 50% 35%,var(--c) 0%,var(--ink) 110%);display:block}
+.rec-list li .ph{display:grid;place-items:center;padding:0;font-family:var(--f-display);font-weight:400;font-size:13px;color:var(--paper-dim);background:var(--ink-3)}
+.rec-list .nm{display:flex;align-items:center;gap:6px;min-width:0;font-weight:800;font-size:12.5px}
+.rec-list .nm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-list .nm em{flex:none;font-style:normal;font-family:var(--f-digit);font-weight:700;font-size:9px;letter-spacing:.14em;color:var(--sea);border:1px solid rgba(53,211,195,.35);padding:0 5px;border-radius:999px}
+.rec-list small{font-family:var(--f-digit);font-weight:600;font-size:10.5px;color:var(--paper-dim);font-variant-numeric:tabular-nums}
+.rec-list time{font-family:var(--f-digit);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:.02em;min-width:5.4em;text-align:right}
+.rec-list li.r1 time{color:var(--sun)}
+.rec-list li.empty{grid-template-columns:24px minmax(0,1fr);color:var(--paper-dim)}
+.rec-list li.empty i{opacity:.4}
+.rec-list li.empty .nm{font-weight:500;font-size:12px}
+.rec-list li.new{background:rgba(255,181,74,.14);animation:recnew 1.3s ease-in-out 3}
+@keyframes recnew{50%{box-shadow:0 0 0 2px rgba(255,181,74,.65)}}
+.recb{--m:var(--ink-3);justify-self:center;display:inline-flex;align-items:center;gap:9px;margin:-8px 0 -2px;padding:5px 15px 5px 6px;border-radius:999px;background:rgba(255,181,74,.13);border:1px solid rgba(255,181,74,.42);font-weight:800;font-size:13px;color:var(--paper);animation:pop2 .5s cubic-bezier(.2,1.6,.4,1)}
+.recb i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-size:13px;line-height:1;color:var(--ink);background:var(--m);box-shadow:inset 0 -2px 0 rgba(28,19,48,.22)}
+.recb.r1{--m:linear-gradient(180deg,#fff3b0,#ffd257 55%,#f29a2e)}
+.recb.r2{--m:linear-gradient(180deg,#ffffff,#cfc4e3)}
+.recb.r3{--m:linear-gradient(180deg,#ffd9bd,#e59a6a)}
+@keyframes pop2{0%{transform:scale(.7)}100%{transform:scale(1)}}
+@media (max-height:800px) and (min-width:861px){
+  .keys{display:none}
+}
+@media (max-width:860px){
+  .records{max-width:none;padding:8px 10px}
+  .rec-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .rec-list li{grid-template-columns:22px minmax(0,1fr);grid-template-areas:"m t" "m n";column-gap:7px;row-gap:1px;padding:6px 8px;background:rgba(12,8,24,.35)}
+  .rec-list li i{grid-area:m}
+  .rec-list li time{grid-area:t;text-align:left;min-width:0;font-size:13.5px}
+  .rec-list li .nm{grid-area:n;font-size:10.5px}
+  .rec-list li .nm em{display:none}
+  .rec-list li img,.rec-list li .ph,.rec-list li small{display:none}
+  .rec-list li.empty{grid-template-areas:"m n";grid-template-columns:22px minmax(0,1fr)}
+  .rec-list li.empty .nm{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media (max-height:560px) and (min-width:640px){
+  .records{display:none}
+}
+
 /* ---------- Online lobby ---------- */
 .btns .wide{grid-column:1/-1}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:5px;border-radius:18px;background:rgba(12,8,24,.5);border:1px solid var(--glass-line)}
@@ -497,6 +547,7 @@ td.tm.run{color:var(--sea);font-family:var(--f-body);font-weight:800;font-size:1
       <p>3つのコースを8台で3周。ドリフトでためて一気に加速、アイテムで逆転をねらおう。</p>
       <div class="cnote" id="cnote" hidden><svg><use href="#i-crown"/></svg><span>コースとクラスはホストが決めます</span></div>
       <div class="courses" id="courses" role="group" aria-label="コース"></div>
+      <div class="records" id="records" aria-live="polite"></div>
       <div class="keys">
         <span><kbd>↑</kbd><kbd>W</kbd>アクセル</span>
         <span><kbd>←</kbd><kbd>→</kbd>ハンドル</span>
@@ -544,6 +595,7 @@ td.tm.run{color:var(--sea);font-family:var(--f-body);font-weight:800;font-size:1
   <div class="card">
     <h2 id="resTitle">GOAL!</h2>
     <p class="lead" id="resLead"></p>
+    <p class="recb" id="resRec" hidden></p>
     <table><tbody id="resBody"></tbody></table>
     <div class="btns">
       <button class="btn primary" id="again">もう一度</button>

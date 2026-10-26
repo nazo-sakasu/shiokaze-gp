@@ -58,6 +58,38 @@
 
   Game.course = () => G.COURSES.find((c) => c.id === Game.settings.course) || G.COURSES[0];
   Game.bestKey = () => Game.settings.course + ':' + Game.settings.cls;
+
+  /* ------------------------------------------------------------ records: the three fastest races per course and class, kept on this device */
+  const REC_KEY = 'shiokaze.records';
+  const Records = (G.Records = {
+    all() {
+      let r = G.store.get(REC_KEY, null);
+      if (!r || typeof r !== 'object') {
+        // first run with records: carry over the single best times earlier versions kept
+        r = {};
+        const best = G.store.get('shiokaze.best', {});
+        for (const k of Object.keys(best || {})) {
+          if (typeof best[k] !== 'number' || !(best[k] > 0)) continue;
+          const key = k.includes(':') ? k : 'shiokaze:' + k;
+          r[key] = (r[key] || []).concat([{ t: best[k], ch: null, nm: '', d: 0, on: 0 }]).sort((a, b) => a.t - b.t).slice(0, 3);
+        }
+        G.store.set(REC_KEY, r);
+      }
+      return r;
+    },
+    list(key) {
+      const l = Records.all()[key];
+      return Array.isArray(l) ? l.filter((e) => e && typeof e.t === 'number' && e.t > 0).slice(0, 3) : [];
+    },
+    // returns the place the new time took (1-3), or 0 when it missed the top three
+    add(key, e) {
+      const all = Records.all();
+      const l = Records.list(key).concat([e]).sort((a, b) => a.t - b.t).slice(0, 3);
+      all[key] = l;
+      G.store.set(REC_KEY, all);
+      return l.indexOf(e) + 1;
+    },
+  });
   // tear the current course down and build another one in its place
   Game.setCourse = function (id) {
     if (id === Game.settings.course && Game.world) return false;
@@ -252,6 +284,9 @@
     const key = Game.bestKey();
     race.newBest = !best[key] || p.finishTime < best[key];
     if (race.newBest) { best[key] = p.finishTime; G.store.set('shiokaze.best', best); }
+    const entry = { t: Math.round(p.finishTime * 1000) / 1000, ch: p.c.id, nm: G.Net && G.Net.cleanName ? G.Net.cleanName(Game.settings.nick) : '', d: Date.now(), on: race.online ? 1 : 0 };
+    race.recRank = Records.add(key, entry);
+    G.UI.lastRec = race.recRank ? { key, d: entry.d } : null;
   };
 
   /* ------------------------------------------------------------ podium */

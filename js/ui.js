@@ -56,13 +56,51 @@
     $('detail').innerHTML = html;
     if (!silent) G.Audio.play('ui');
   };
-  UI.showBest = function () {
-    const best = G.store.get('shiokaze.best', {});
-    let v = best[Game.bestKey()];
-    if (v == null && Game.settings.course === 'shiokaze') v = best[String(Game.settings.cls)];
-    const cls = G.CLASSES[Game.settings.cls];
-    $('best').textContent = 'ベスト（' + cls.cc + '） ' + (v ? G.fmt(v) : '―');
+  // best time line + the TOP3 card for a course and class (guests follow the host's choice)
+  UI.showBest = function (co, cl) {
+    co = co || Game.settings.course;
+    cl = cl == null ? Game.settings.cls : cl;
+    const key = co + ':' + cl;
+    const list = G.Records.list(key);
+    const cls = G.CLASSES[cl] || G.CLASSES[1];
+    const line = 'ベスト（' + cls.cc + '） ' + (list.length ? G.fmt(list[0].t) : '―');
+    if ($('best').textContent !== line) $('best').textContent = line;
+    UI.renderRecords(key, co, cls, list);
   };
+  UI.renderRecords = function (key, co, cls, list) {
+    const box = $('records');
+    if (!box) return;
+    const course = G.COURSES.find((c) => c.id === co) || Game.course();
+    const hl = UI.lastRec && UI.lastRec.key === key ? UI.lastRec.d : -1;
+    const sig = JSON.stringify([key, list, hl]);
+    if (box.dataset.sig === sig) return;
+    box.dataset.sig = sig;
+    let rows = '';
+    for (let i = 0; i < 3; i++) {
+      const e = list[i];
+      if (!e) {
+        rows += '<li class="r' + (i + 1) + ' empty"><i>' + (i + 1) + '</i><span class="nm">' + (i === 0 ? 'まだ記録がありません' : '―') + '</span></li>';
+        continue;
+      }
+      const ch = G.CHARS.find((c) => c.id === e.ch);
+      const nm = e.nm || (ch ? ch.name : '以前の記録');
+      const dt = e.d ? new Date(e.d) : null;
+      rows += '<li class="r' + (i + 1) + (e.d && e.d === hl ? ' new' : '') + '" style="--c:' + (ch ? ch.kart : '#3b2c63') + '"><i>' + (i + 1) + '</i>' +
+        (ch ? '<img alt="" src="' + face(ch.id) + '">' : '<b class="ph">?</b>') +
+        '<span class="nm"><span>' + esc(nm || '―') + '</span>' + (e.on ? '<em>ONLINE</em>' : '') + '</span>' +
+        '<small>' + (dt ? (dt.getMonth() + 1) + '/' + dt.getDate() : '') + '</small>' +
+        '<time>' + G.fmt(e.t) + '</time></li>';
+    }
+    box.innerHTML = '<div class="rec-h"><b>記録 TOP3</b><span>' + esc(course.name) + '・' + cls.cc + '</span></div><ol class="rec-list">' + rows + '</ol>';
+  };
+  function recBadge(race) {
+    const b = $('resRec');
+    const n = race.recRank | 0;
+    b.hidden = !n;
+    if (!n) return;
+    b.className = 'recb r' + n;
+    b.innerHTML = '<i>' + n + '</i>' + (n === 1 ? 'ベストタイム更新！ 記録 1位' : '記録 TOP3 の ' + n + '位に入りました');
+  }
 
   /* ------------------------------------------------ course picker */
   function drawCourseMap(cv, course) {
@@ -162,6 +200,7 @@
     $('results').hidden = true;
     $('pause').hidden = true;
     G.Audio.stopMusic(true);
+    UI.lastRec = null;
     Game.newRace(false);
     UI.toast(Game.course().name);
     G.Audio.startEngine();
@@ -257,7 +296,8 @@
     const rank = all.indexOf(p) + 1;
     $('resTitle').innerHTML = rank + '<small>' + ORD(rank) + '</small>';
     const lead = rank === 1 ? '優勝！ ' + Game.course().name + 'をいちばんに駆け抜けました。' : rank <= 3 ? rank + '位で表彰台！ あと少しで頂点です。' : rank + '位。ドリフトのミニターボで差を詰めよう。';
-    $('resLead').textContent = lead + (race.newBest ? '　ベストタイム更新！' : '');
+    $('resLead').textContent = lead;
+    recBadge(race);
     const body = $('resBody');
     body.innerHTML = '';
     all.forEach((k, i) => {
@@ -298,6 +338,7 @@
     let lead = rank === 1 ? (humans > 1 ? '優勝！ みんなの中でいちばん速かった！' : '優勝！ ' + Game.course().name + 'を制覇しました。') : rank <= 3 ? rank + '位で表彰台！' : rank + '位。ミニターボで差を詰めよう。';
     if (left) lead += '　まだ' + left + '人が走っています…';
     $('resLead').textContent = lead;
+    recBadge(race);
     const body = $('resBody');
     body.innerHTML = '';
     all.forEach((k, i) => {
@@ -405,6 +446,7 @@
     $('cnote').hidden = !guest;
     $('clsNote').textContent = guest ? 'ホストが決めます' : 'DIFFICULTY';
     renderStart(online);
+    if (!$('title').hidden) UI.showBest(co, cl);
     if (!online) { box.dataset.sig = ''; return; }
 
     const mem = inRoom ? Net.members() : [];
@@ -579,6 +621,7 @@
     }));
   };
   UI.enterOnlineRace = function () {
+    UI.lastRec = null;
     G.Audio.unlock();
     $('title').hidden = true;
     $('results').hidden = true;
